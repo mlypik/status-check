@@ -8,7 +8,7 @@ val macwire = "com.softwaremill.macwire" %% "macros" % "2.3.0" % "provided"
 val scalaTest = "org.scalatest" %% "scalatest" % "3.0.4" % Test
 
 lazy val `status-check` = (project in file("."))
-  .aggregate(`status-check-api`, `status-check-impl`, `status-check-stream-api`, `status-check-stream-impl`)
+  .aggregate(`status-check-api`, `status-check-impl`, `status-check-stream-api`, `status-check-stream-impl`, `jobservice-api`, `jobservice-impl`)
 
 lazy val `status-check-api` = (project in file("status-check-api"))
   .settings(
@@ -48,3 +48,24 @@ lazy val `status-check-stream-impl` = (project in file("status-check-stream-impl
     )
   )
   .dependsOn(`status-check-stream-api`, `status-check-api`)
+
+lazy val `jobservice-api` = (project in file("jobservice-api"))
+  .settings(
+    libraryDependencies ++= Seq(
+      lagomScaladslApi
+    )
+  )
+
+lazy val `jobservice-impl` = (project in file("jobservice-impl"))
+  .enablePlugins(LagomScala)
+  .settings(
+    libraryDependencies ++= Seq(
+      lagomScaladslPersistenceCassandra,
+      lagomScaladslKafkaBroker,
+      lagomScaladslTestKit,
+      macwire,
+      scalaTest
+    )
+  )
+  .settings(lagomForkedTestSettings: _*)
+  .dependsOn(`status-check-api`)

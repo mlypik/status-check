@@ -11,7 +11,7 @@ object JobService {
 trait JobService extends Service {
 
   //submit job definition, get jod id for later lookup
-  def submit(): ServiceCall[JobDefinition, String]
+  def submit(): ServiceCall[JobDefinition, JobId]
 
   def jobSubmittedTopic(): Topic[JobSubmitted]
 
@@ -30,13 +30,19 @@ trait JobService extends Service {
 }
 
 
+case class JobId(id: Long)
+
+object JobId {
+  implicit val format: Format[JobId] = Json.format[JobId]
+}
+
 case class JobDefinition(addresses: List[String])
 
 object JobDefinition {
   implicit val format: Format[JobDefinition] = Json.format[JobDefinition]
 }
 
-case class JobSubmitted(id: Long, definition: JobDefinition)
+case class JobSubmitted(id: JobId, definition: JobDefinition)
 
 object JobSubmitted {
   implicit val format: Format[JobSubmitted] = Json.format[JobSubmitted]

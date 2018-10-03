@@ -1,5 +1,7 @@
 package io.github.mlypik.jobservice.impl
 
+import com.lightbend.lagom.scaladsl.api.ServiceLocator
+import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
 import com.lightbend.lagom.scaladsl.broker.kafka.LagomKafkaComponents
 import com.lightbend.lagom.scaladsl.persistence.cassandra.CassandraPersistenceComponents
 import com.lightbend.lagom.scaladsl.server.{LagomApplication, LagomApplicationContext, LagomApplicationLoader}
@@ -9,7 +11,9 @@ import play.api.libs.ws.ahc.AhcWSComponents
 
 
 class JobServiceLoader extends LagomApplicationLoader {
-  override def load(context: LagomApplicationContext): LagomApplication = ???
+  override def load(context: LagomApplicationContext): LagomApplication = new JobsApplication(context) {
+    override def serviceLocator: ServiceLocator = NoServiceLocator
+  }
 }
 
 abstract class JobsApplication(context: LagomApplicationContext)

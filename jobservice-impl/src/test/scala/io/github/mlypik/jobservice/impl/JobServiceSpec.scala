@@ -19,9 +19,9 @@ class JobServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll 
   override protected def afterAll(): Unit = server.stop()
 
   "job service" should {
-    "respond with job id" in {
-      client.submit().invoke(JobDefinition(List("192.168.1.1"))).map { answer =>
-        answer shouldBe a[String]
+    "respond with PRETTY job id" in {
+      client.submit().invoke(JobDefinition(List("192.168.1.1"))).map {
+        case io.github.mlypik.jobservice.api.JobId(jobId) => jobId should fullyMatch regex """[A-Z]{4}-[0-9]{5}-[A-Z]{4}-[0-9]{5}"""
       }
     }
   }

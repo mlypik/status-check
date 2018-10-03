@@ -6,6 +6,7 @@ scalaVersion in ThisBuild := "2.12.4"
 
 val macwire = "com.softwaremill.macwire" %% "macros" % "2.3.0" % "provided"
 val scalaTest = "org.scalatest" %% "scalatest" % "3.0.4" % Test
+val idGenerator = "com.softwaremill.common" %% "id-generator" % "1.2.0"
 
 lazy val `status-check` = (project in file("."))
   .aggregate(`status-check-api`, `status-check-impl`, `status-check-stream-api`, `status-check-stream-impl`, `jobservice-api`, `jobservice-impl`)
@@ -64,6 +65,7 @@ lazy val `jobservice-impl` = (project in file("jobservice-impl"))
       lagomScaladslKafkaBroker,
       lagomScaladslTestKit,
       macwire,
+      idGenerator,
       scalaTest
     )
   )

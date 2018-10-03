@@ -30,7 +30,7 @@ trait JobService extends Service {
 }
 
 
-case class JobId(id: Long)
+case class JobId(id: String)
 
 object JobId {
   implicit val format: Format[JobId] = Json.format[JobId]

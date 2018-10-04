@@ -3,7 +3,7 @@ package io.github.mlypik.jobservice.impl
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 import com.lightbend.lagom.scaladsl.persistence.{AggregateEvent, AggregateEventTag, AggregateEventTagger, PersistentEntity}
 import com.lightbend.lagom.scaladsl.playjson.{JsonSerializer, JsonSerializerRegistry}
-import io.github.mlypik.jobservice.api.JobDefinition
+import io.github.mlypik.jobservice.api.{JobDefinition, JobId, JobStatus}
 import play.api.libs.json.{Format, Json}
 
 import scala.collection.immutable
@@ -13,26 +13,25 @@ class JobsEntity extends PersistentEntity {
   override type Event = JobEvent
   override type State = JobServiceState
 
-  override def initialState: State = JobServiceState(List())
+  override def initialState: State = JobServiceState(JobStatus("Does not exist"), "")
 
   override def behavior: Behavior = {
-    case JobServiceState(jobs) => Actions().onCommand[CreateJob, io.github.mlypik.jobservice.api.JobId] {
+    case JobServiceState(jobProgress, jobResult) => Actions().onCommand[CreateJob, JobId] {
       case (CreateJob(jobid, jobDefinition), ctx, state) => {
         ctx.thenPersist(
           JobSubmitted(jobid, jobDefinition)
         ) { _ =>
-          ctx.reply(io.github.mlypik.jobservice.api.JobId(jobid.id))
+          ctx.reply(jobid)
         }
+      }
+    }.onReadOnlyCommand[GetJobStatus, JobStatus] {
+      case (GetJobStatus(), ctx, state) => {
+        ctx.reply(jobProgress)
       }
     }
   }
 }
 
-case class JobId(id: String)
-
-object JobId {
-  implicit val format: Format[JobId] = Json.format
-}
 
 case class JobDetails(details: String)
 
@@ -50,7 +49,9 @@ object JobEvent {
 
 sealed trait JobCommand[R] extends ReplyType[R]
 
-case class CreateJob(jobid: JobId, jobDefinition: JobDefinition) extends JobCommand[io.github.mlypik.jobservice.api.JobId]
+case class CreateJob(jobid: JobId, jobDefinition: JobDefinition) extends JobCommand[JobId]
+
+case class GetJobStatus() extends JobCommand[JobStatus]
 
 
 case class JobSubmitted(jobId: JobId, jobDetails: JobDefinition) extends JobEvent
@@ -59,7 +60,7 @@ object JobSubmitted {
   implicit val format: Format[JobSubmitted] = Json.format
 }
 
-case class JobServiceState(jobs: List[JobId])
+case class JobServiceState(state: JobStatus, result: String)
 
 object JobServiceState {
   implicit val format: Format[JobServiceState] = Json.format

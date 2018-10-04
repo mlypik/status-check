@@ -1,7 +1,7 @@
 package io.github.mlypik.statuscheck.impl
 
 import io.github.mlypik.statuscheck.api
-import io.github.mlypik.statuscheck.api.{StatuscheckService}
+import io.github.mlypik.statuscheck.api.StatuscheckService
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.broker.Topic
 import com.lightbend.lagom.scaladsl.broker.TopicProducer

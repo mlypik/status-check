@@ -13,10 +13,10 @@ class JobsEntity extends PersistentEntity {
   override type Event = JobEvent
   override type State = JobServiceState
 
-  override def initialState: State = JobServiceState(JobStatus("Does not exist"), "")
+  override def initialState: State = JobServiceState(JobStatus("Does not exist"), JobDefinition(List()), "")
 
   override def behavior: Behavior = {
-    case JobServiceState(jobProgress, jobResult) => Actions().onCommand[CreateJob, JobId] {
+    case JobServiceState(jobProgress, _, jobResult) => Actions().onCommand[CreateJob, JobId] {
       case (CreateJob(jobid, jobDefinition), ctx, state) => {
         ctx.thenPersist(
           JobSubmitted(jobid, jobDefinition)
@@ -27,6 +27,10 @@ class JobsEntity extends PersistentEntity {
     }.onReadOnlyCommand[GetJobStatus, JobStatus] {
       case (GetJobStatus(), ctx, state) => {
         ctx.reply(jobProgress)
+      }
+    }.onEvent {
+      case (JobSubmitted(jobid, jobDefinition), state) => {
+        JobServiceState(JobStatus("Submitted"), jobDefinition, "")
       }
     }
   }
@@ -60,7 +64,7 @@ object JobSubmitted {
   implicit val format: Format[JobSubmitted] = Json.format
 }
 
-case class JobServiceState(state: JobStatus, result: String)
+case class JobServiceState(state: JobStatus, jobDefinition: JobDefinition, result: String)
 
 object JobServiceState {
   implicit val format: Format[JobServiceState] = Json.format

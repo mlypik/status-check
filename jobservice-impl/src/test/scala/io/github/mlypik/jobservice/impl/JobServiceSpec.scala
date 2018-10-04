@@ -28,8 +28,19 @@ class JobServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll 
 
   "job service get status" should {
     "return 'does not exist' for nonexistent job id" in {
-      client.getJobStatus(JobId("AAAA-00000-AAAA-01007")).invoke().map{
+      client.getJobStatus(JobId("AAAA-00000-AAAA-01007")).invoke().map {
         case JobStatus(status) => status shouldBe "Does not exist"
+      }
+    }
+  }
+
+  "job service get status" should {
+    "return 'Submitted' for submitted job id" in {
+      for {
+        jobId <- client.submit().invoke(JobDefinition(List("192.168.1.1")))
+        jobStatus <- client.getJobStatus(jobId).invoke()
+      } yield {
+        jobStatus.status shouldBe "Submitted"
       }
     }
   }
